@@ -4,12 +4,12 @@ using Xunit;
 
 namespace BlazorDashboardKit.Tests.Components;
 
-public class WidgetPickerTests : TestContext
+public class WidgetPickerTests : BunitContext
 {
     [Fact]
     public void Lists_Provided_Descriptors()
     {
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor>
                 { new() { Type = "Notes", Name = "Notes", Category = "Utility" } }));
         Assert.Contains("Notes", cut.Markup);
@@ -22,7 +22,7 @@ public class WidgetPickerTests : TestContext
         // host loads Bootstrap CSS but not Bootstrap's JS bundle, so a
         // data-bs-toggle-only dropdown never opens. Clicking the toggle must
         // add/remove the Bootstrap `.show` class via Blazor, not JS.
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor>
                 { new() { Type = "Notes", Name = "Notes", Category = "Utility" } }));
 
@@ -38,7 +38,7 @@ public class WidgetPickerTests : TestContext
     [Fact]
     public void Escape_Closes_The_Menu()
     {
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor>
                 { new() { Type = "Notes", Name = "Notes", Category = "Utility" } }));
 
@@ -52,7 +52,7 @@ public class WidgetPickerTests : TestContext
     [Fact]
     public void Clicking_Outside_Backdrop_Closes_The_Menu()
     {
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor>
                 { new() { Type = "Notes", Name = "Notes", Category = "Utility" } }));
 
@@ -72,7 +72,7 @@ public class WidgetPickerTests : TestContext
     {
         // After picking a widget the menu should collapse, matching the
         // dismiss-on-select behaviour Bootstrap's JS used to provide.
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor>
                 { new() { Type = "Notes", Name = "Notes", Category = "Utility" } })
             .Add(x => x.OnWidgetAdded, (WidgetDescriptor _) => { }));
@@ -90,7 +90,7 @@ public class WidgetPickerTests : TestContext
         WidgetDescriptor? added = null;
         var descriptor = new WidgetDescriptor { Type = "Notes", Name = "Notes", Category = "Utility" };
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetPicker>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetPicker>(p => p
             .Add(x => x.Available, new List<WidgetDescriptor> { descriptor })
             .Add(x => x.OnWidgetAdded, (WidgetDescriptor d) => added = d));
 

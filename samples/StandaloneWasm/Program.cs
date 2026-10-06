@@ -12,6 +12,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // Swap in UseJsonFileStore / a custom IDashboardStore for real persistence.
 builder.Services.AddBlazorDashboard()
     .AddDashboardWidget<CounterWidget>(CounterWidget.Descriptor)
-    .AddDashboardWidget<MarkdownNoteWidget>(MarkdownNoteWidget.Descriptor);
+    .AddDashboardWidget<MarkdownNoteWidget>(MarkdownNoteWidget.Descriptor)
+    .AddDashboardWidget<ClockWidget>(ClockWidget.Descriptor)
+    .AddDashboardWidget<StatsCardWidget>(StatsCardWidget.Descriptor);
 
 await builder.Build().RunAsync();

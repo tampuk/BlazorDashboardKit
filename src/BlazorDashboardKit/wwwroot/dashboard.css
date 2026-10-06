@@ -8,33 +8,45 @@
    ancestor (zero-specificity :where() means their values always win).
    ============================================================================ */
 
-:where(.grid-stack, .dashboard-header, .widget-config-panel, .widget-config-backdrop) {
-    --bdk-surface:        var(--btcpay-bg-tile, #ffffff);
-    --bdk-surface-muted:  var(--btcpay-body-bg, #f8f9fa);
-    --bdk-text:           var(--btcpay-body-text, #212529);
-    --bdk-text-muted:     var(--btcpay-body-text-muted, #6c757d);
-    --bdk-border:         var(--btcpay-body-border-light, rgba(0, 0, 0, 0.125));
-    --bdk-primary:        var(--btcpay-primary, #0d6efd);
-    --bdk-danger:         var(--btcpay-danger, #dc3545);
-    --bdk-radius:         var(--btcpay-border-radius, 0.5rem);
-    --bdk-radius-sm:      var(--btcpay-border-radius-sm, 0.25rem);
-    --bdk-shadow:         var(--btcpay-box-shadow, 0 1px 3px rgba(0, 0, 0, 0.08));
-    --bdk-font-mono:      var(--btcpay-font-family-monospace, ui-monospace, SFMono-Regular, Menlo, monospace);
-    --bdk-space:          0.75rem;
-    --bdk-grid-gap:       0.75rem;
+:where(.grid-stack, .dashboard-header, .widget-config-panel, .widget-config-backdrop, .bdk-modal-container) {
+    --bdk-surface: var(--btcpay-bg-tile, #ffffff);
+    --bdk-surface-muted: var(--btcpay-body-bg, #f8f9fa);
+    --bdk-text: var(--btcpay-body-text, #212529);
+    --bdk-text-muted: var(--btcpay-body-text-muted, #6c757d);
+    --bdk-border: var(--btcpay-body-border-light, rgba(0, 0, 0, 0.125));
+    --bdk-primary: var(--btcpay-primary, #0d6efd);
+    --bdk-danger: var(--btcpay-danger, #dc3545);
+    --bdk-radius: var(--btcpay-border-radius, 0.5rem);
+    --bdk-radius-sm: var(--btcpay-border-radius-sm, 0.25rem);
+    --bdk-shadow: var(--btcpay-box-shadow, 0 1px 3px rgba(0, 0, 0, 0.08));
+    --bdk-font-mono: var(--btcpay-font-family-monospace, ui-monospace, SFMono-Regular, Menlo, monospace);
+    --bdk-space: 0.75rem;
+    --bdk-grid-gap: 0.75rem;
     --bdk-edit-header-height: 2rem;
     --bdk-fallback-item-min-height: 9rem;
+    /* Tabbed UI specific variables */
+    --bdk-tab-bg: var(--bdk-surface-muted, #f8f9fa);
+    --bdk-tab-active-bg: var(--bdk-surface, #ffffff);
+    --bdk-tab-hover-bg: rgba(0, 0, 0, 0.04);
+    --bdk-tab-border: var(--bdk-border, rgba(0, 0, 0, 0.125));
+    --bdk-tab-radius: var(--bdk-radius, 0.5rem);
+    --bdk-tab-height: 2.25rem;
 }
 
-/* Auto dark mode: only the colour tokens change, and only the kit's own
-   standalone defaults — the BTCPay var() fallbacks still take precedence when a
-   host theme is present, and a consumer's explicit --bdk-* override (any
-   selector beats these zero-specificity :where rules) still wins. */
-/* No automatic OS dark mode: the kit must match its host, not override it via
-   prefers-color-scheme (a light host page would otherwise get a dark widget
-   card). Dark is opt-in — set the --bdk-* tokens (or inherit --btcpay-*). A
-   consumer who wants OS-driven dark can add their own prefers-color-scheme
-   block setting --bdk-surface/-text/etc. */
+/* Auto dark mode handling for Tabs & Modals */
+@media (prefers-color-scheme: dark) {
+    .dashboard-header {
+        --bdk-tab-hover-bg: rgba(255, 255, 255, 0.06);
+    }
+
+    .tab-action-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .bdk-modal-close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
 
 /* ── Gridstack base ── */
 .grid-stack {
@@ -46,31 +58,25 @@
     flex-direction: column;
 }
 
-/* The visible widget card. Self-contained chrome so a bare widget body still
-   reads as a card without any host theme. */
-.grid-stack-item-content > .widget {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
-    background: var(--bdk-surface);
-    color: var(--bdk-text);
-    border: 1px solid var(--bdk-border);
-    border-radius: var(--bdk-radius);
-    box-shadow: var(--bdk-shadow);
-    padding: var(--bdk-space);
-    scrollbar-width: thin;
-    scrollbar-color: var(--bdk-border) transparent;
-}
+    /* The visible widget card. */
+    .grid-stack-item-content > .widget {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        background: var(--bdk-surface);
+        color: var(--bdk-text);
+        border: 1px solid var(--bdk-border);
+        border-radius: var(--bdk-radius);
+        box-shadow: var(--bdk-shadow);
+        padding: var(--bdk-space);
+        scrollbar-width: thin;
+        scrollbar-color: var(--bdk-border) transparent;
+    }
 
-/* ── Static fallback layout ──
-   When GridStack's JS has not positioned items (static SSR, prerender, and the
-   pre-interactive flash on Server/WASM), gridstack.min.css leaves items
-   absolutely positioned with no size → 0×0 collapse. DashboardHost marks the
-   container `.bdk-grid-static` until the JS grid is live; force a readable
-   stacked flow until then. GridStack's inline styles take over once live. */
+/* ── Static fallback layout ── */
 .grid-stack.bdk-grid-static {
     height: auto !important;
     display: flex;
@@ -78,25 +84,25 @@
     gap: var(--bdk-grid-gap);
 }
 
-.grid-stack.bdk-grid-static > .grid-stack-item {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: var(--bdk-fallback-item-min-height);
-    left: auto !important;
-    top: auto !important;
-}
+    .grid-stack.bdk-grid-static > .grid-stack-item {
+        position: relative !important;
+        inset: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: var(--bdk-fallback-item-min-height);
+        left: auto !important;
+        top: auto !important;
+    }
 
-/* Constrain wallet balance chart height — Chartist ct-major-tenth uses
-   padding-bottom: 40% aspect ratio which is too tall on the grid. Cap it. */
+/* Constrain wallet balance chart height */
 .grid-stack-item .store-wallet-balance .ct-chart {
     max-height: 160px;
 }
-.grid-stack-item .store-wallet-balance .ct-chart:before {
-    padding-bottom: 20%;
-}
+
+    .grid-stack-item .store-wallet-balance .ct-chart:before {
+        padding-bottom: 20%;
+    }
 
 /* ── Edit mode header with drag handle ── */
 .widget-edit-header {
@@ -138,9 +144,9 @@
     padding: 0;
 }
 
-.widget-drag-handle:active {
-    cursor: grabbing;
-}
+    .widget-drag-handle:active {
+        cursor: grabbing;
+    }
 
 /* Grip dots icon — 2x3 dot grid using box-shadow */
 .widget-grip-dots {
@@ -152,27 +158,27 @@
     opacity: 0.45;
 }
 
-.widget-grip-dots::before,
-.widget-grip-dots::after {
-    content: '';
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: currentColor;
-}
+    .widget-grip-dots::before,
+    .widget-grip-dots::after {
+        content: '';
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+    }
 
-.widget-grip-dots::before {
-    top: 1px;
-    left: 0;
-    box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
-}
+    .widget-grip-dots::before {
+        top: 1px;
+        left: 0;
+        box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
+    }
 
-.widget-grip-dots::after {
-    top: 1px;
-    right: 0;
-    box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
-}
+    .widget-grip-dots::after {
+        top: 1px;
+        right: 0;
+        box-shadow: 0 6px 0 currentColor, 0 12px 0 currentColor;
+    }
 
 .widget-controls {
     display: none;
@@ -199,10 +205,10 @@
     transition: color 0.15s, background 0.15s;
 }
 
-.widget-control-btn:hover {
-    color: var(--bdk-text);
-    background: rgba(127, 127, 127, 0.12);
-}
+    .widget-control-btn:hover {
+        color: var(--bdk-text);
+        background: rgba(127, 127, 127, 0.12);
+    }
 
 .widget-control-btn--danger:hover {
     color: var(--bdk-danger);
@@ -250,6 +256,277 @@
     min-width: 200px;
 }
 
+/* ── Dashboard Tabs Bar ── */
+.dashboard-tabs-bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--bdk-tab-border);
+    position: relative;
+}
+
+.dashboard-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    flex-grow: 1;
+    min-width: 0; /* let the flex item shrink so overflow-x can kick in */
+    overflow-x: auto; /* horizontal scrolling stays */
+    overflow-y: hidden; /* never scroll vertically */
+    /* Shift the whole strip down 1px so the tabs' own bottom borders sit on
+       the bar's border. Done here (once, for all tabs) instead of on the
+       active tab, so active/inactive geometry stays identical. */
+    margin-bottom: -1px;
+    scrollbar-width: thin;
+}
+
+    .dashboard-tabs::-webkit-scrollbar {
+        height: 4px; /* horizontal only */
+        width: 0; /* no vertical scrollbar in WebKit */
+    }
+
+.dashboard-tab {
+    display: flex;
+    align-items: center;
+    gap: 0; /* spacing now lives in the children */
+    height: var(--bdk-tab-height);
+    padding: 0; /* children own their insets so the title button can fill the tab */
+    background: var(--bdk-tab-bg);
+    /* Uniform border setup in BOTH states: the bottom border always exists
+       (transparent when inactive) so active and inactive tabs have exactly
+       the same height and their top edges align. */
+    border: 1px solid var(--bdk-tab-border);
+    border-bottom-color: transparent;
+    border-radius: var(--bdk-tab-radius) var(--bdk-tab-radius) 0 0;
+    color: var(--bdk-text-muted);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    position: relative;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer; /* the whole tab is clickable */
+    min-width: 100px;
+    max-width: 200px;
+}
+
+    .dashboard-tab:hover:not(.active) {
+        background: var(--bdk-tab-hover-bg);
+        color: var(--bdk-text);
+    }
+
+    .dashboard-tab.active {
+        background: var(--bdk-tab-active-bg);
+        color: var(--bdk-text);
+        font-weight: 500;
+        z-index: 2;
+        /* Same 1px bottom border as every other tab, just coloured to mask the
+       bar's border underneath — no extra margin/padding/height needed. */
+        border-bottom-color: var(--bdk-tab-active-bg);
+    }
+
+/* The title button mirrors the parent's box: full height via
+   align-self: stretch, full remaining width via flex: 1. The click handler
+   lives on the parent .dashboard-tab; clicks here bubble up to it. */
+.tab-title-btn {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    align-self: stretch; /* fill the tab's full height */
+    min-width: 0;
+    background: none;
+    border: none;
+    padding: 0 0.75rem; /* text inset moved here from the tab */
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+    .tab-title-btn:focus {
+        outline: none;
+    }
+
+        .tab-title-btn:focus .tab-title-text {
+            text-decoration: underline;
+        }
+
+/* Ellipsis needs its own block inside the flex button */
+.tab-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The input replaces the button in edit mode; give it the insets the
+   tab padding used to provide. */
+.tab-name-input {
+    background: transparent;
+    border: 1px solid var(--bdk-border);
+    border-radius: var(--bdk-radius-sm);
+    padding: 0.125rem 0.375rem;
+    color: var(--bdk-text);
+    font: inherit;
+    font-weight: 500;
+    flex: 1 1 auto;
+    min-width: 50px;
+    margin: 0.25rem 0.5rem 0.25rem 0.75rem;
+}
+
+/* Close button keeps its own hit area, inset from the tab's right edge */
+.tab-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--bdk-text-muted);
+    border-radius: var(--bdk-radius-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0 0.5rem 0 0; /* right inset from the tab edge */
+    opacity: 0.6;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+    .tab-action-btn:hover:not(:disabled) {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.08);
+        color: var(--bdk-text);
+    }
+
+.tab-close-btn:hover:not(:disabled) {
+    color: var(--bdk-danger);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.tab-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--bdk-text-muted);
+    border-radius: var(--bdk-radius-sm);
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+    .tab-add-btn:hover:not(:disabled) {
+        background: var(--bdk-tab-hover-bg);
+        color: var(--bdk-text);
+    }
+
+    .tab-add-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.dashboard-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.375rem;
+    flex-shrink: 0;
+}
+
+/* ── Modal Dialog ── */
+.bdk-modal-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1060; /* Higher than config panel (1050) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.bdk-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.bdk-modal-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 1rem;
+    background: var(--bdk-surface);
+    color: var(--bdk-text);
+    border: 1px solid var(--bdk-border);
+    border-radius: var(--bdk-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    animation: slideInUp 0.2s ease-out;
+}
+
+.bdk-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--bdk-border);
+}
+
+.bdk-modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.bdk-modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--bdk-text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--bdk-radius-sm);
+    transition: background 0.15s, color 0.15s;
+}
+
+    .bdk-modal-close-btn:hover {
+        background: rgba(127, 127, 127, 0.12);
+        color: var(--bdk-text);
+    }
+
+.bdk-modal-body {
+    padding: 1.25rem;
+    flex: 1;
+}
+
+    .bdk-modal-body p {
+        margin: 0;
+        line-height: 1.5;
+    }
+
+.bdk-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--bdk-border);
+}
+
 /* ── Widget picker ── */
 .widget-picker-category {
     font-size: 0.75rem;
@@ -277,9 +554,9 @@
     min-height: 80px;
 }
 
-.widget-unavailable-overlay h6 {
-    color: var(--bdk-text-muted);
-}
+    .widget-unavailable-overlay h6 {
+        color: var(--bdk-text-muted);
+    }
 
 /* ── Edit mode visual cues ── */
 .dashboard-edit > .grid-stack-item > .grid-stack-item-content {
@@ -359,7 +636,7 @@
     position: relative;
 }
 
-/* Optional debug label (opt-in via DashboardHost ShowDebugInfo). */
+/* Optional debug label */
 .widget-debug-label {
     position: absolute;
     right: 0;
@@ -383,11 +660,33 @@
 }
 
 @keyframes slideInRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }

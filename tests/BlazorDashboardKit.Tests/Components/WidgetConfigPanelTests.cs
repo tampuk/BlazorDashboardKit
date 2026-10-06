@@ -6,7 +6,7 @@ using Xunit;
 
 namespace BlazorDashboardKit.Tests.Components;
 
-public class WidgetConfigPanelTests : TestContext
+public class WidgetConfigPanelTests : BunitContext
 {
     [Fact]
     public void Shell_Override_Wraps_The_Config_Body_And_Owns_No_Save_Logic()
@@ -27,7 +27,7 @@ public class WidgetConfigPanelTests : TestContext
             b.CloseElement();
         };
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
             .Add(x => x.Visible, true)
             .Add(x => x.ConfigComponentType, typeof(TestConfigEditor))
             .Add(x => x.Config, original)
@@ -48,7 +48,7 @@ public class WidgetConfigPanelTests : TestContext
     [Fact]
     public void Renders_The_Widgets_Config_Component()
     {
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
             .Add(x => x.Visible, true)
             .Add(x => x.ConfigComponentType, typeof(TestConfigEditor))
             .Add(x => x.Config, new JsonObject { ["Name"] = "hello" }));
@@ -60,7 +60,7 @@ public class WidgetConfigPanelTests : TestContext
     [Fact]
     public void No_Config_Component_Shows_Message_And_No_Save()
     {
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
             .Add(x => x.Visible, true)
             .Add(x => x.ConfigComponentType, (Type?)null)
             .Add(x => x.Config, new JsonObject()));
@@ -75,7 +75,7 @@ public class WidgetConfigPanelTests : TestContext
         var original = new JsonObject { ["Name"] = "old" };
         JsonObject? emitted = null;
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
+        var cut = Render<BlazorDashboardKit.Components.WidgetConfigPanel>(p => p
             .Add(x => x.Visible, true)
             .Add(x => x.ConfigComponentType, typeof(TestConfigEditor))
             .Add(x => x.Config, original)

@@ -4,12 +4,12 @@ using Xunit;
 
 namespace BlazorDashboardKit.Tests.Components;
 
-public class WidgetConfigComponentTests : TestContext
+public class WidgetConfigComponentTests : BunitContext
 {
     [Fact]
     public void Model_Is_Built_From_ConfigJson()
     {
-        var cut = RenderComponent<TestConfigEditor>(p => p
+        var cut = Render<TestConfigEditor>(p => p
             .Add(x => x.ConfigJson, new JsonObject { ["Name"] = "seed" }));
 
         Assert.Equal("seed", cut.Find("input.test-config-name").GetAttribute("value"));
@@ -22,7 +22,7 @@ public class WidgetConfigComponentTests : TestContext
         // arrives (panel open), not on every render — otherwise each keystroke's
         // re-render would discard what the user just typed.
         JsonObject? emitted = null;
-        var cut = RenderComponent<TestConfigEditor>(p => p
+        var cut = Render<TestConfigEditor>(p => p
             .Add(x => x.ConfigJson, new JsonObject { ["Name"] = "old" })
             .Add(x => x.ConfigJsonChanged, (JsonObject c) => emitted = c));
 

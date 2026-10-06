@@ -15,198 +15,223 @@
 }
 else
 {
-<div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center gap-2">
-        @if (_collection is not null && _collection.Dashboards.Count > 1)
-        {
-            <select class="form-select form-select-sm" style="width: auto;"
-                    aria-label="Select dashboard"
-                    value="@_activeDashboard.Id" @onchange="SwitchDashboard">
-                @foreach (var d in _collection.Dashboards)
+    <div class="dashboard-header mb-3">
+        <div class="dashboard-tabs-bar">
+            <div class="dashboard-tabs">
+                @if (_collection is not null)
                 {
-                    <option value="@d.Id" selected="@(d.Id == _activeDashboard.Id)">@d.Name</option>
-                }
-            </select>
-        }
-        @if (EditMode)
-        {
-            <input type="text" class="form-control form-control-sm fw-bold"
-                   style="width: auto; min-width: 140px; max-width: 280px;"
-                   value="@_activeDashboard.Name" aria-label="Dashboard name"
-                   @onchange="OnDashboardNameChanged" />
-            <button class="btn btn-outline-secondary btn-sm" type="button"
-                    title="New dashboard" disabled="@_widgetEditMode" @onclick="AddDashboard">+ Dashboard</button>
-            @if (_collection is not null && _collection.Dashboards.Count > 1)
-            {
-                @if (_confirmDeleteDash)
-                {
-                    <button class="btn btn-danger btn-sm" type="button"
-                            title="Confirm delete dashboard" disabled="@_widgetEditMode"
-                            @onclick="DeleteActiveDashboard">Confirm delete</button>
-                    <button class="btn btn-outline-secondary btn-sm" type="button"
-                            @onclick="() => _confirmDeleteDash = false">Cancel</button>
-                }
-                else
-                {
-                    <button class="btn btn-outline-danger btn-sm" type="button"
-                            title="Delete this dashboard" disabled="@_widgetEditMode"
-                            @onclick="() => _confirmDeleteDash = true">Delete</button>
-                }
-            }
-        }
-        else if (_collection is null || _collection.Dashboards.Count <= 1)
-        {
-            <h3 class="mb-0">@(_activeDashboard?.Name ?? "Dashboard")</h3>
-        }
-    </div>
-
-    <div class="d-flex gap-2 align-items-center">
-        @if (EditMode)
-        {
-            var pickerCtx = new WidgetPickerContext(_availableWidgets,
-                EventCallback.Factory.Create<WidgetDescriptor>(this, AddWidget));
-            @if (WidgetPickerTemplate is not null)
-            {
-                @WidgetPickerTemplate(pickerCtx)
-            }
-            else if (WidgetPickerComponent is not null)
-            {
-                <DynamicComponent Type="WidgetPickerComponent"
-                                  Parameters="@(new Dictionary<string, object> { ["Context"] = pickerCtx })" />
-            }
-            else
-            {
-                <WidgetPicker Available="_availableWidgets" OnWidgetAdded="AddWidget" />
-            }
-            @if (_actionsOpen)
-            {
-                <div class="bdk-dropdown-backdrop" @onclick="() => _actionsOpen = false"></div>
-            }
-            <div class="dropdown @(_actionsOpen ? "show" : null)"
-                 @onkeydown="@(e => { if (e.Key == "Escape") _actionsOpen = false; })">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                        @onclick="ToggleActions" disabled="@_widgetEditMode"
-                        aria-expanded="@(_actionsOpen ? "true" : "false")">
-                    Actions
-                </button>
-                <div class="dropdown-menu dropdown-menu-end @(_actionsOpen ? "show" : null)">
-                    <button class="dropdown-item" @onclick="ExportDashboard">Export</button>
-                    <label class="dropdown-item mb-0" style="cursor: pointer;">
-                        Import
-                        <input type="file" accept=".json" @ref="_importFileInput" @onchange="ImportDashboard" hidden />
-                    </label>
-                </div>
-            </div>
-            <button class="btn btn-primary btn-sm" disabled="@_widgetEditMode" @onclick="ExitEditMode">Done</button>
-        }
-        else
-        {
-            @if (!ReadOnly)
-            {
-                <button class="btn btn-link btn-sm" @onclick="EnterEditMode">Edit</button>
-            }
-        }
-    </div>
-</div>
-
-<div id="@_gridContainerId" class="grid-stack @(EditMode ? "dashboard-edit" : "") @(_interactive && _gridInitialized ? null : "bdk-grid-static")">
-    @if (_activeDashboard is not null && _activeDashboard.Widgets.Count > 0)
-    {
-        @foreach (var wp in ComputeGridPositions())
-        {
-            var descriptor = WidgetRegistry.GetDescriptor(wp.Placement.WidgetType);
-            var isConfiguring = _configuringPlacement?.Id == wp.Placement.Id;
-            <div @key="wp.Placement.Id"
-                 class="grid-stack-item @(isConfiguring ? "widget-configuring" : "")"
-                 gs-id="@wp.Placement.Id"
-                 gs-x="@wp.X"
-                 gs-y="@wp.Y"
-                 gs-w="@wp.W"
-                 gs-h="@wp.Placement.RowSpan"
-                 gs-min-w="@(descriptor?.MinColumnSize)"
-                 gs-max-w="@(descriptor?.MaxColumnSize)"
-                 gs-min-h="@(descriptor?.MinRowSpan)"
-                 gs-max-h="@(descriptor?.MaxRowSpan)"
-                 gs-locked="@(wp.Placement.Locked ? "true" : null)"
-                 gs-no-move="@(wp.Placement.Locked ? "true" : null)"
-                 gs-no-resize="@(wp.Placement.Locked ? "true" : null)">
-                <div class="grid-stack-item-content">
-                    @if (descriptor is null)
+                    foreach (var d in _collection.Dashboards)
                     {
-                        var uctx = new WidgetUnavailableContext(wp.Placement, EditMode,
-                            EventCallback.Factory.Create(this, () => RemoveWidget(wp.Placement)));
-                        @if (WidgetUnavailableTemplate is not null)
-                        {
-                            @WidgetUnavailableTemplate(uctx)
-                        }
-                        else if (WidgetUnavailableComponent is not null)
-                        {
-                            <DynamicComponent Type="WidgetUnavailableComponent"
-                                              Parameters="@(new Dictionary<string, object> { ["Context"] = uctx })" />
-                        }
-                        else
-                        {
-                            <WidgetUnavailable Placement="wp.Placement"
-                                               EditMode="EditMode"
-                                               OnRemove="uctx.Remove" />
-                        }
+                        var isActive = d.Id == _activeDashboard.Id;
+
+                        <div class="dashboard-tab @(isActive ? "active" : "")" @onclick="() => SwitchDashboard(d.Id)">
+                            @if (EditMode && isActive)
+                            {
+                                <input type="text" class="tab-name-input"
+                                       value="@d.Name" aria-label="Dashboard name"
+                                       @onchange="OnDashboardNameChanged" @onclick:stopPropagation="true" />
+                            }
+                            else
+                            {
+                                @* No handler here: the click bubbles to the parent div,
+                                which owns the switch. The button is kept for semantics
+                                and keyboard activation (Enter/Space bubble too). *@
+                                <button type="button" class="tab-title-btn">
+                                    @d.Name
+                                </button>
+                            }
+
+                            @if (EditMode && _collection.Dashboards.Count > 1)
+                            {
+                                <button type="button" class="tab-action-btn tab-close-btn" title="Close tab" disabled="@_widgetEditMode"
+                                        @onclick="() => _pendingDeleteDashboardId = d.Id" @onclick:stopPropagation="true">
+                                    ×
+                                </button>
+                            }
+                        </div>
+                    }
+                }
+                @if (EditMode)
+                {
+                    <button type="button" class="tab-add-btn" title="New dashboard" disabled="@_widgetEditMode" @onclick="AddDashboard">
+                        <span aria-hidden="true">+</span>
+                    </button>
+                }
+            </div>
+
+            <div class="dashboard-header-actions">
+                @if (EditMode)
+                {
+                    var pickerCtx = new WidgetPickerContext(_availableWidgets,
+                        EventCallback.Factory.Create<WidgetDescriptor>(this, AddWidget));
+                    @if (WidgetPickerTemplate is not null)
+                    {
+                        @WidgetPickerTemplate(pickerCtx)
+                    }
+                    else if (WidgetPickerComponent is not null)
+                    {
+                        <DynamicComponent Type="WidgetPickerComponent"
+                                          Parameters="@(new Dictionary<string, object> { ["Context"] = pickerCtx })" />
                     }
                     else
                     {
-                        <WidgetContainer Placement="wp.Placement"
-                                         Descriptor="descriptor"
-                                         StoreId="@string.Empty"
-                                         UserId="@string.Empty"
-                                         EditMode="EditMode"
-                                         WidgetEditMode="_widgetEditMode"
-                                         ShowDebugInfo="ShowDebugInfo"
-                                         ReadOnly="ReadOnly"
-                                         HostInteractive="_interactive"
-                                         OnConfigChanged="(config) => OnWidgetConfigChanged(wp.Placement, config)"
-                                         OnEditModeChanged="OnWidgetEditMode"
-                                         OnRemove="() => RemoveWidget(wp.Placement)"
-                                         OnSizeChanged="(_) => OnWidgetSizeChanged()"
-                                         OnToggleLock="() => ToggleWidgetLock(wp.Placement)"
-                                         OnDuplicate="() => DuplicateWidget(wp.Placement)"
-                                         HeaderTemplate="WidgetHeaderTemplate"
-                                         HeaderComponent="WidgetHeaderComponent"
-                                         ErrorTemplate="WidgetErrorTemplate"
-                                         ErrorComponent="WidgetErrorComponent"
-                                         OnConfigure="() => OpenConfigPanel(wp.Placement, descriptor)" />
+                        <WidgetPicker Available="_availableWidgets" OnWidgetAdded="AddWidget" />
                     }
+
+                    @if (_actionsOpen)
+                    {
+                        <div class="bdk-dropdown-backdrop" @onclick="() => _actionsOpen = false"></div>
+                    }
+                    <div class="dropdown @(_actionsOpen ? "show" : null)"
+                         @onkeydown="@(e => { if (e.Key == "Escape") _actionsOpen = false; })">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                @onclick="ToggleActions" disabled="@_widgetEditMode"
+                                aria-expanded="@(_actionsOpen ? "true" : "false")">
+                            Actions
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end @(_actionsOpen ? "show" : null)">
+                            <button class="dropdown-item" @onclick="ExportDashboard">Export</button>
+                            <label class="dropdown-item mb-0" style="cursor: pointer;">
+                                Import
+                                <input type="file" accept=".json" @ref="_importFileInput" @onchange="ImportDashboard" hidden />
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" disabled="@_widgetEditMode" @onclick="ExitEditMode">Done</button>
+                }
+                else
+                {
+                    @if (!ReadOnly)
+                    {
+                        <button class="btn btn-link btn-sm text-decoration-none" @onclick="EnterEditMode">Edit</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="@_gridContainerId" class="grid-stack @(EditMode ? "dashboard-edit" : "") @(_interactive && _gridInitialized ? null : "bdk-grid-static")">
+        @if (_activeDashboard is not null && _activeDashboard.Widgets.Count > 0)
+        {
+            @foreach (var wp in ComputeGridPositions())
+            {
+                var descriptor = WidgetRegistry.GetDescriptor(wp.Placement.WidgetType);
+                var isConfiguring = _configuringPlacement?.Id == wp.Placement.Id;
+                <div @key="wp.Placement.Id"
+                     class="grid-stack-item @(isConfiguring ? "widget-configuring" : "")"
+                     gs-id="@wp.Placement.Id"
+                     gs-x="@wp.X"
+                     gs-y="@wp.Y"
+                     gs-w="@wp.W"
+                     gs-h="@wp.Placement.RowSpan"
+                     gs-min-w="@(descriptor?.MinColumnSize)"
+                     gs-max-w="@(descriptor?.MaxColumnSize)"
+                     gs-min-h="@(descriptor?.MinRowSpan)"
+                     gs-max-h="@(descriptor?.MaxRowSpan)"
+                     gs-locked="@(wp.Placement.Locked ? "true" : null)"
+                     gs-no-move="@(wp.Placement.Locked ? "true" : null)"
+                     gs-no-resize="@(wp.Placement.Locked ? "true" : null)">
+                    <div class="grid-stack-item-content">
+                        @if (descriptor is null)
+                        {
+                            var uctx = new WidgetUnavailableContext(wp.Placement, EditMode,
+                                EventCallback.Factory.Create(this, () => RemoveWidget(wp.Placement)));
+                            @if (WidgetUnavailableTemplate is not null)
+                            {
+                                @WidgetUnavailableTemplate(uctx)
+                            }
+                            else if (WidgetUnavailableComponent is not null)
+                            {
+                                <DynamicComponent Type="WidgetUnavailableComponent"
+                                                  Parameters="@(new Dictionary<string, object> { ["Context"] = uctx })" />
+                            }
+                            else
+                            {
+                                <WidgetUnavailable Placement="wp.Placement"
+                                                   EditMode="EditMode"
+                                                   OnRemove="uctx.Remove" />
+                            }
+                        }
+                        else
+                        {
+                            <WidgetContainer Placement="wp.Placement"
+                                             Descriptor="descriptor"
+                                             StoreId="@string.Empty"
+                                             UserId="@string.Empty"
+                                             EditMode="EditMode"
+                                             WidgetEditMode="_widgetEditMode"
+                                             ShowDebugInfo="ShowDebugInfo"
+                                             ReadOnly="ReadOnly"
+                                             HostInteractive="_interactive"
+                                             OnConfigChanged="(config) => OnWidgetConfigChanged(wp.Placement, config)"
+                                             OnEditModeChanged="OnWidgetEditMode"
+                                             OnRemove="() => RemoveWidget(wp.Placement)"
+                                             OnSizeChanged="(_) => OnWidgetSizeChanged()"
+                                             OnToggleLock="() => ToggleWidgetLock(wp.Placement)"
+                                             OnDuplicate="() => DuplicateWidget(wp.Placement)"
+                                             HeaderTemplate="WidgetHeaderTemplate"
+                                             HeaderComponent="WidgetHeaderComponent"
+                                             ErrorTemplate="WidgetErrorTemplate"
+                                             ErrorComponent="WidgetErrorComponent"
+                                             OnConfigure="() => OpenConfigPanel(wp.Placement, descriptor)" />
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else if (_activeDashboard is not null)
+        {
+            var emptyCtx = new EmptyDashboardContext(EditMode);
+            @if (EmptyTemplate is not null)
+            {
+                @EmptyTemplate(emptyCtx)
+            }
+            else if (EmptyComponent is not null)
+            {
+                <DynamicComponent Type="EmptyComponent"
+                                  Parameters="@(new Dictionary<string, object> { ["Context"] = emptyCtx })" />
+            }
+            else
+            {
+                <div class="dashboard-empty text-center py-5">
+                    <h5 class="text-muted mb-3">This dashboard is empty</h5>
+                    <p class="text-secondary mb-3">Add widgets in edit mode to get started.</p>
+                </div>
+            }
+        }
+    </div>
+
+    <WidgetConfigPanel Visible="_configuringPlacement is not null"
+                       ConfigComponentType="_configuringDescriptor?.ConfigComponentType"
+                       Config="@(_configuringPlacement?.Config ?? new JsonObject())"
+                       ConfigChanged="SaveWidgetConfig"
+                       ShellTemplate="ConfigPanelTemplate"
+                       ShellComponent="ConfigPanelComponent"
+                       OnClose="CloseConfigPanel" />
+
+    @if (_pendingDeleteDashboardId is not null)
+    {
+        var dashboardToDelete = _collection?.Dashboards.FirstOrDefault(d => d.Id == _pendingDeleteDashboardId);
+        if (dashboardToDelete is not null)
+        {
+            <div class="bdk-modal-container">
+                <div class="bdk-modal-backdrop" @onclick="() => _pendingDeleteDashboardId = null"></div>
+                <div class="bdk-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="bdk-delete-modal-title" @onclick:stopPropagation>
+                    <div class="bdk-modal-header">
+                        <h5 class="bdk-modal-title" id="bdk-delete-modal-title">Delete Dashboard</h5>
+                        <button type="button" class="bdk-modal-close-btn" aria-label="Close" @onclick="() => _pendingDeleteDashboardId = null">×</button>
+                    </div>
+                    <div class="bdk-modal-body">
+                        <p>Are you sure you want to delete <strong>@dashboardToDelete.Name</strong>? This action cannot be undone.</p>
+                    </div>
+                    <div class="bdk-modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => _pendingDeleteDashboardId = null">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="ConfirmDeleteDashboard">Delete</button>
+                    </div>
                 </div>
             </div>
         }
     }
-    else if (_activeDashboard is not null)
-    {
-        var emptyCtx = new EmptyDashboardContext(EditMode);
-        @if (EmptyTemplate is not null)
-        {
-            @EmptyTemplate(emptyCtx)
-        }
-        else if (EmptyComponent is not null)
-        {
-            <DynamicComponent Type="EmptyComponent"
-                              Parameters="@(new Dictionary<string, object> { ["Context"] = emptyCtx })" />
-        }
-        else
-        {
-            <div class="dashboard-empty text-center py-5">
-                <h5 class="text-muted mb-3">This dashboard is empty</h5>
-                <p class="text-secondary mb-3">Add widgets in edit mode to get started.</p>
-            </div>
-        }
-    }
-</div>
-
-<WidgetConfigPanel Visible="_configuringPlacement is not null"
-                   ConfigComponentType="_configuringDescriptor?.ConfigComponentType"
-                   Config="@(_configuringPlacement?.Config ?? new JsonObject())"
-                   ConfigChanged="SaveWidgetConfig"
-                   ShellTemplate="ConfigPanelTemplate"
-                   ShellComponent="ConfigPanelComponent"
-                   OnClose="CloseConfigPanel" />
 }
 
 @code {
@@ -251,7 +276,10 @@ else
     private IReadOnlyList<WidgetDescriptor> _availableWidgets = Array.Empty<WidgetDescriptor>();
     private bool _widgetEditMode;
     private bool _actionsOpen;
-    private bool _confirmDeleteDash;
+
+    // Tracks the ID of the dashboard pending deletion via the modal dialog
+    private string? _pendingDeleteDashboardId;
+
     private DotNetObjectReference<object>? _dotNetRef;
     private readonly CancellationTokenSource _disposeCts = new();
     private readonly string _gridContainerId = "bdk-grid-" + Guid.NewGuid().ToString("N");
@@ -637,14 +665,13 @@ else
         _configuringDescriptor = null;
         _widgetEditMode = false;
         _actionsOpen = false;
-        _confirmDeleteDash = false;
+        _pendingDeleteDashboardId = null;
     }
 
-    private async Task SwitchDashboard(ChangeEventArgs e)
+    private async Task SwitchDashboard(string dashboardId)
     {
         if (_collection is null) return;
-        var id = e.Value?.ToString();
-        var target = _collection.Dashboards.FirstOrDefault(d => d.Id == id);
+        var target = _collection.Dashboards.FirstOrDefault(d => d.Id == dashboardId);
         if (target is null || ReferenceEquals(target, _activeDashboard)) return;
 
         _activeDashboard = target;
@@ -666,17 +693,35 @@ else
         await ResetGrid();
     }
 
-    private async Task DeleteActiveDashboard()
+    private async Task ConfirmDeleteDashboard()
     {
-        if (_collection is null || _activeDashboard is null || _collection.Dashboards.Count <= 1)
+        if (_pendingDeleteDashboardId is not null)
+        {
+            var idToDelete = _pendingDeleteDashboardId;
+            _pendingDeleteDashboardId = null;
+            await DeleteDashboard(idToDelete);
+        }
+    }
+
+    private async Task DeleteDashboard(string dashboardId)
+    {
+        if (_collection is null) return;
+        var target = _collection.Dashboards.FirstOrDefault(d => d.Id == dashboardId);
+        if (target is null || _collection.Dashboards.Count <= 1)
             return; // never delete the last dashboard
 
-        _collection.Dashboards.Remove(_activeDashboard);
-        _activeDashboard = _collection.Dashboards[0];
-        _collection.ActiveDashboardId = _activeDashboard.Id;
-        ResetTransientState();
+        _collection.Dashboards.Remove(target);
+
+        // If the deleted tab was the active one, switch to another tab
+        if (ReferenceEquals(target, _activeDashboard))
+        {
+            _activeDashboard = _collection.Dashboards[0];
+            _collection.ActiveDashboardId = _activeDashboard.Id;
+            ResetTransientState();
+            await ResetGrid();
+        }
+
         await SaveDashboard();
-        await ResetGrid();
     }
 
     private void ToggleActions() => _actionsOpen = !_actionsOpen;
@@ -684,30 +729,40 @@ else
     private async Task ExportDashboard()
     {
         _actionsOpen = false;
-        if (_activeDashboard is null) return;
+        if (_collection is null || _collection.Dashboards.Count == 0) return;
 
-        // Create a clean export object without internal state
+        // Create a clean export object without internal state.
+        // Version 2 exports the WHOLE collection (every dashboard), not just
+        // the active one. The active dashboard is recorded by index so that
+        // ids can be regenerated on import without breaking the reference.
+        var activeIndex = _activeDashboard is null
+            ? 0
+            : Math.Max(0, _collection.Dashboards.IndexOf(_activeDashboard));
+
         var export = new
         {
-            Version = 1,
-            _activeDashboard.Name,
-            _activeDashboard.Description,
-            Widgets = _activeDashboard.Widgets.OrderBy(w => w.Order).Select(w => new
+            Version = 2,
+            ActiveDashboardIndex = activeIndex,
+            Dashboards = _collection.Dashboards.Select(d => new
             {
-                w.WidgetType,
-                w.ColumnSize,
-                w.RowSpan,
-                w.Offset,
-                w.Row,
-                w.Order,
-                w.Locked,
-                w.Config
+                d.Name,
+                d.Description,
+                Widgets = d.Widgets.OrderBy(w => w.Order).Select(w => new
+                {
+                    w.WidgetType,
+                    w.ColumnSize,
+                    w.RowSpan,
+                    w.Offset,
+                    w.Row,
+                    w.Order,
+                    w.Locked,
+                    w.Config
+                })
             })
         };
 
         var json = JsonSerializer.Serialize(export, new JsonSerializerOptions { WriteIndented = true });
-        var safeName = _activeDashboard.Name.Replace(" ", "-").ToLowerInvariant();
-        await JsInterop.DownloadJsonAsync($"dashboard-{safeName}.json", json, Interactive, _disposeCts.Token);
+        await JsInterop.DownloadJsonAsync("dashboard-collection.json", json, Interactive, _disposeCts.Token);
     }
 
     private async Task ImportDashboard()
@@ -715,57 +770,43 @@ else
         _actionsOpen = false;
         var json = await JsInterop.ReadFileAsTextAsync(_importFileInput, Interactive, _disposeCts.Token);
         if (string.IsNullOrWhiteSpace(json)) return;
-        if (_activeDashboard is null || _collection is null) return;
+        if (_collection is null) return;
 
         try
         {
             var imported = JsonNode.Parse(json) as JsonObject;
             if (imported is null) return;
 
-            var name = imported["Name"]?.GetValue<string>() ?? "Imported Dashboard";
-            var description = imported["Description"]?.GetValue<string>();
-            var widgetsArray = imported["Widgets"] as JsonArray;
+            List<DashboardDefinition> dashboards;
+            var activeIndex = 0;
 
-            var dashboard = new DashboardDefinition
+            if (imported["Dashboards"] is JsonArray dashboardsArray)
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = name,
-                Description = description
-            };
-
-            if (widgetsArray is not null)
-            {
-                var order = 0;
-                foreach (var w in widgetsArray)
+                // Version 2: whole-collection export.
+                dashboards = new List<DashboardDefinition>(dashboardsArray.Count);
+                foreach (var d in dashboardsArray)
                 {
-                    if (w is not JsonObject wo) continue;
-                    dashboard.Widgets.Add(new WidgetPlacement
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        WidgetType = wo["WidgetType"]?.GetValue<string>() ?? "",
-                        ColumnSize = wo["ColumnSize"]?.GetValue<int>() ?? 6,
-                        RowSpan = wo["RowSpan"]?.GetValue<int>() ?? 1,
-                        // Preserve null (auto-flow). Coercing missing offsets to 0 would pin
-                        // every imported widget to column 0 under the new nullable semantics.
-                        Offset = wo["Offset"]?.GetValue<int?>(),
-                        Row = wo["Row"]?.GetValue<int?>(),
-                        Order = order++,
-                        Locked = wo["Locked"]?.GetValue<bool>() ?? false,
-                        Config = wo["Config"]?.DeepClone() as JsonObject
-                    });
+                    if (d is JsonObject dobj) dashboards.Add(ReadDashboard(dobj));
                 }
+                activeIndex = imported["ActiveDashboardIndex"]?.GetValue<int>() ?? 0;
+            }
+            else
+            {
+                // Version 1 (legacy single-dashboard export): treat the file as
+                // a one-dashboard collection so both formats share one code path.
+                dashboards = new List<DashboardDefinition> { ReadDashboard(imported) };
             }
 
-            // Replace the active dashboard in-place within the collection so the
-            // owner-keyed save persists the imported layout as the active one.
-            var idx = _collection.Dashboards.FindIndex(d => d.Id == _activeDashboard.Id);
-            if (idx >= 0)
-                _collection.Dashboards[idx] = dashboard;
-            else
-                _collection.Dashboards.Add(dashboard);
-            _collection.ActiveDashboardId = dashboard.Id;
-            _activeDashboard = dashboard;
+            if (dashboards.Count == 0) return;
 
+            // Replace the entire collection content so the owner-keyed save
+            // persists exactly what was in the file.
+            _collection.Dashboards.Clear();
+            _collection.Dashboards.AddRange(dashboards);
+            _activeDashboard = _collection.Dashboards[Math.Clamp(activeIndex, 0, dashboards.Count - 1)];
+            _collection.ActiveDashboardId = _activeDashboard.Id;
+
+            ResetTransientState();
             await SaveDashboard();
             await ResetGrid();
         }
@@ -773,6 +814,47 @@ else
         {
             // A malformed user-supplied import file must not crash the dashboard.
         }
+    }
+
+    /// <summary>
+    /// Builds a dashboard from an exported JSON object (shared by the v2
+    /// collection format and the legacy v1 single-dashboard format).
+    /// All ids are regenerated; nothing external references the old ones.
+    /// </summary>
+    private static DashboardDefinition ReadDashboard(JsonObject source)
+    {
+        var dashboard = new DashboardDefinition
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = source["Name"]?.GetValue<string>() ?? "Imported Dashboard",
+            Description = source["Description"]?.GetValue<string>()
+        };
+
+        if (source["Widgets"] is JsonArray widgetsArray)
+        {
+            var order = 0;
+            foreach (var w in widgetsArray)
+            {
+                if (w is not JsonObject wo) continue;
+                dashboard.Widgets.Add(new WidgetPlacement
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    WidgetType = wo["WidgetType"]?.GetValue<string>() ?? "",
+                    ColumnSize = wo["ColumnSize"]?.GetValue<int>() ?? 6,
+                    RowSpan = wo["RowSpan"]?.GetValue<int>() ?? 1,
+                    // Preserve null (auto-flow). Coercing missing offsets to 0 would pin
+                    // every imported widget to column 0 under the new nullable semantics.
+                    Offset = wo["Offset"]?.GetValue<int?>(),
+                    Row = wo["Row"]?.GetValue<int?>(),
+                    Order = wo["Order"]?.GetValue<int>() ?? order,
+                    Locked = wo["Locked"]?.GetValue<bool>() ?? false,
+                    Config = wo["Config"]?.DeepClone() as JsonObject
+                });
+                order++;
+            }
+        }
+
+        return dashboard;
     }
 
     private async Task SaveDashboard()

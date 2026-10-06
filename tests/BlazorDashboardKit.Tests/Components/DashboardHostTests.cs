@@ -11,7 +11,7 @@ using Xunit;
 
 namespace BlazorDashboardKit.Tests.Components;
 
-public class DashboardHostTests : TestContext
+public class DashboardHostTests : BunitContext
 {
     [Fact]
     public async Task Loads_Persisted_Dashboard_And_Flags_Unknown_Widget()
@@ -36,7 +36,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped<DashboardJsInterop>(_ => new DashboardJsInterop(JSInterop.JSRuntime));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1"));
         cut.WaitForState(() => cut.Markup.Contains("widget-unavailable"), TimeSpan.FromSeconds(5));
         Assert.Contains("widget-unavailable", cut.Markup);
@@ -55,7 +55,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped<DashboardJsInterop>(_ => new DashboardJsInterop(JSInterop.JSRuntime));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -87,7 +87,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped<DashboardJsInterop>(_ => new DashboardJsInterop(JSInterop.JSRuntime));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -119,7 +119,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped<DashboardJsInterop>(_ => new DashboardJsInterop(JSInterop.JSRuntime));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -153,7 +153,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped<DashboardJsInterop>(_ => new DashboardJsInterop(JSInterop.JSRuntime));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, ""));
 
         Assert.Contains("dashboard-empty-container", cut.Markup);
@@ -184,7 +184,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -215,7 +215,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.ShowDebugInfo, showDebugInfo));
@@ -239,7 +239,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -293,7 +293,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
         var changes = 0;
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.OnDashboardChanged, () => changes++));
@@ -321,7 +321,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -354,7 +354,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -387,7 +387,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
         var opts = new DashboardGridOptions { Columns = 6, CellHeight = 100, Margin = 4, MobileColumns = 2 };
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.GridOptions, opts));
@@ -411,7 +411,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -442,7 +442,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -481,7 +481,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1").Add(x => x.EditMode, true));
         cut.WaitForState(() => js.InitGridCalls == 1, TimeSpan.FromSeconds(5));
         return cut.Instance;
@@ -505,7 +505,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1").Add(x => x.EditMode, true));
         cut.WaitForState(() => js.InitGridCalls == 1, TimeSpan.FromSeconds(5));
         return cut;
@@ -620,7 +620,7 @@ public class DashboardHostTests : TestContext
             b.CloseElement();
         };
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.WidgetPickerTemplate, tpl));
@@ -652,7 +652,7 @@ public class DashboardHostTests : TestContext
             b.CloseElement();
         };
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.EmptyTemplate, tpl));
@@ -689,7 +689,7 @@ public class DashboardHostTests : TestContext
             b.CloseElement();
         };
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true)
             .Add(x => x.WidgetUnavailableTemplate, tpl));
@@ -718,7 +718,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
@@ -751,7 +751,7 @@ public class DashboardHostTests : TestContext
         Services.AddScoped<DashboardService>();
         Services.AddScoped(_ => new DashboardJsInterop(js));
 
-        var cut = RenderComponent<BlazorDashboardKit.Components.DashboardHost>(p => p
+        var cut = Render<BlazorDashboardKit.Components.DashboardHost>(p => p
             .Add(x => x.OwnerKey, "owner-1")
             .Add(x => x.EditMode, true));
 
